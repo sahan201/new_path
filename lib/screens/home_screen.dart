@@ -1,5 +1,9 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'map_screen.dart';
+import 'profile_screen.dart';
+import 'place_details_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -10,40 +14,13 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
-  String _selectedTab = 'All';
-  final List<String> _tabs = ['All', 'Popular', 'Recommended'];
-  
-  final List<Map<String, dynamic>> _destinations = [
-    {
-      'name': 'Demak',
-      'location': 'Kab. Semarang',
-      'image': 'mountain_lake',
-      'color': const Color(0xFF87CEEB),
-    },
-    {
-      'name': 'Klaten',
-      'location': 'Kab. Solo',
-      'image': 'temple',
-      'color': const Color(0xFFFFD700),
-    },
-  ];
 
-  final List<Map<String, dynamic>> _categories = [
-    {
-      'name': 'Villages',
-      'icon': Icons.home_rounded,
-      'color': const Color(0xFF90EE90),
-    },
-    {
-      'name': 'Mountains',
-      'icon': Icons.terrain_rounded,
-      'color': const Color(0xFF87CEEB),
-    },
-    {
-      'name': 'Rice Fields',
-      'icon': Icons.grass_rounded,
-      'color': const Color(0xFFFFD700),
-    },
+  // Define the screens for each tab
+  final List<Widget> _screens = [
+    const HomeTab(),
+    const MapScreen(), // Ensure MapScreen no longer has its own Scaffold/BottomNav
+    const Center(child: Text('Saved Places (Coming Soon)')), // Placeholder for Saved
+    const ProfileScreen(),
   ];
 
   @override
@@ -61,276 +38,36 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Header
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(30),
-                  bottomRight: Radius.circular(30),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 5),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Where do you',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  const Text(
-                    'wanna go?',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  
-                  // Search bar
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF0F0F0),
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Searching destination ...',
-                        hintStyle: TextStyle(
-                          color: Colors.grey[500],
-                          fontSize: 14,
-                        ),
-                        border: InputBorder.none,
-                        icon: Icon(
-                          Icons.search,
-                          color: Colors.grey[500],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  
-                  // Tab buttons
-                  Row(
-                    children: _tabs.map((tab) {
-                      bool isSelected = _selectedTab == tab;
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 10),
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _selectedTab = tab;
-                            });
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? const Color(0xFFF4A460)
-                                  : const Color(0xFFF0F0F0),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              tab,
-                              style: TextStyle(
-                                color: isSelected
-                                    ? Colors.white
-                                    : Colors.grey[600],
-                                fontWeight: isSelected
-                                    ? FontWeight.w600
-                                    : FontWeight.normal,
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ],
-              ),
-            ),
-            
-            // Content
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Destination cards
-                    SizedBox(
-                      height: 200,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: _destinations.length,
-                        itemBuilder: (context, index) {
-                          return _buildDestinationCard(_destinations[index]);
-                        },
-                      ),
-                    ),
-                    
-                    const SizedBox(height: 30),
-                    
-                    // Categories
-                    const Text(
-                      'Categories',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: _categories.map((category) {
-                        return _buildCategoryItem(category);
-                      }).toList(),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            
-            // Bottom navigation
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, -5),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildNavItem(Icons.home_rounded, 'Home', 0),
-                  _buildNavItem(Icons.notifications_rounded, 'Notifications', 1),
-                  _buildNavItem(Icons.shopping_bag_rounded, 'Order', 2),
-                  _buildNavItem(Icons.person_rounded, 'Profile', 3),
-                ],
-              ),
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _screens,
+      ),
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(30),
+            topRight: Radius.circular(30),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, -5),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildDestinationCard(Map<String, dynamic> destination) {
-    return Container(
-      width: 160,
-      margin: const EdgeInsets.only(right: 15),
-      decoration: BoxDecoration(
-        color: destination['color'],
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: destination['color'].withOpacity(0.3),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          // Background illustration
-          if (destination['image'] == 'mountain_lake')
-            Positioned.fill(
-              child: CustomPaint(
-                painter: MountainLakePainter(),
-              ),
-            )
-          else if (destination['image'] == 'temple')
-            Positioned.fill(
-              child: CustomPaint(
-                painter: TemplePainter(),
-              ),
-            ),
-          
-          // Content
-          Positioned(
-            bottom: 15,
-            left: 15,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  destination['name'],
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  destination['location'],
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.9),
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCategoryItem(Map<String, dynamic> category) {
-    return Column(
-      children: [
-        Container(
-          width: 70,
-          height: 70,
-          decoration: BoxDecoration(
-            color: category['color'].withOpacity(0.3),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            category['icon'],
-            color: category['color'],
-            size: 35,
-          ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _buildNavItem(Icons.home_rounded, 'Home', 0),
+            _buildNavItem(Icons.map_rounded, 'Map', 1),
+            _buildNavItem(Icons.bookmark_rounded, 'Saved', 2),
+            _buildNavItem(Icons.person_rounded, 'Profile', 3),
+          ],
         ),
-        const SizedBox(height: 8),
-        Text(
-          category['name'],
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[700],
-          ),
-        ),
-      ],
+      ),
     );
   }
 
@@ -345,16 +82,24 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            color: isSelected ? const Color(0xFF8CB369) : Colors.grey[400],
-            size: 28,
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: isSelected ? const Color(0xFF8CB369).withOpacity(0.1) : Colors.transparent,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              icon,
+              color: isSelected ? const Color(0xFF8CB369) : Colors.grey[400],
+              size: 26,
+            ),
           ),
-          const SizedBox(height: 4),
           Text(
             label,
             style: TextStyle(
-              fontSize: 10,
+              fontSize: 12, // Increased size for readability
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               color: isSelected ? const Color(0xFF8CB369) : Colors.grey[400],
             ),
           ),
@@ -364,108 +109,227 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// Custom painter for mountain lake scene
-class MountainLakePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    // Mountains
-    final mountainPaint = Paint()
-      ..color = Colors.white.withOpacity(0.3)
-      ..style = PaintingStyle.fill;
+// --- extracted Home Content to separate widget ---
 
-    final mountainPath = Path()
-      ..moveTo(0, size.height * 0.4)
-      ..lineTo(size.width * 0.3, size.height * 0.2)
-      ..lineTo(size.width * 0.5, size.height * 0.3)
-      ..lineTo(size.width * 0.7, size.height * 0.1)
-      ..lineTo(size.width, size.height * 0.35)
-      ..lineTo(size.width, size.height)
-      ..lineTo(0, size.height)
-      ..close();
-
-    canvas.drawPath(mountainPath, mountainPaint);
-
-    // Trees
-    final treePaint = Paint()
-      ..color = const Color(0xFF228B22).withOpacity(0.5)
-      ..style = PaintingStyle.fill;
-
-    // Draw simple triangle trees
-    for (double x = 20; x < size.width; x += 40) {
-      final treePath = Path()
-        ..moveTo(x, size.height * 0.6)
-        ..lineTo(x - 10, size.height * 0.7)
-        ..lineTo(x + 10, size.height * 0.7)
-        ..close();
-      canvas.drawPath(treePath, treePaint);
-    }
-
-    // House
-    final housePaint = Paint()
-      ..color = const Color(0xFF8B4513).withOpacity(0.6)
-      ..style = PaintingStyle.fill;
-
-    canvas.drawRect(
-      Rect.fromLTWH(
-        size.width * 0.1,
-        size.height * 0.5,
-        size.width * 0.2,
-        size.height * 0.15,
-      ),
-      housePaint,
-    );
-  }
+class HomeTab extends StatefulWidget {
+  const HomeTab({super.key});
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  State<HomeTab> createState() => _HomeTabState();
 }
 
-// Custom painter for temple scene
-class TemplePainter extends CustomPainter {
+class _HomeTabState extends State<HomeTab> {
+  String _selectedTab = 'All';
+  final List<String> _tabs = ['All', 'Popular', 'Recommended'];
+
+  final List<Map<String, dynamic>> _destinations = [
+    {
+      'id': '1',
+      'name': 'Demak Great Mosque',
+      'location': 'Central Java',
+      'image': 'https://images.unsplash.com/photo-1564507592333-c60657eea523?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+      'rating': 4.8,
+    },
+    {
+      'id': '2',
+      'name': 'Prambanan Temple',
+      'location': 'Yogyakarta',
+      'image': 'https://images.unsplash.com/photo-1596402184320-417e7178b2cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+      'rating': 4.9,
+    },
+    {
+      'id': '3',
+      'name': 'Mount Bromo',
+      'location': 'East Java',
+      'image': 'https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+      'rating': 4.7,
+    },
+  ];
+
+  final List<Map<String, dynamic>> _categories = [
+    {'name': 'Nature', 'icon': Icons.landscape_rounded, 'color': const Color(0xFF87CEEB)},
+    {'name': 'Culture', 'icon': Icons.temple_buddhist_rounded, 'color': const Color(0xFFFFD700)},
+    {'name': 'Relax', 'icon': Icons.spa_rounded, 'color': const Color(0xFF90EE90)},
+    {'name': 'Food', 'icon': Icons.restaurant_rounded, 'color': const Color(0xFFFF7F50)},
+  ];
+
   @override
-  void paint(Canvas canvas, Size size) {
-    // Temple structure
-    final templePaint = Paint()
-      ..color = const Color(0xFF8B4513).withOpacity(0.5)
-      ..style = PaintingStyle.fill;
-
-    // Main temple body
-    canvas.drawRect(
-      Rect.fromLTWH(
-        size.width * 0.3,
-        size.height * 0.4,
-        size.width * 0.4,
-        size.height * 0.3,
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Column(
+        children: [
+          // Header
+          Container(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+            color: Colors.white,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Where do you', style: TextStyle(fontSize: 26, color: Colors.grey)),
+                const Text('wanna go?', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Color(0xFF2C3E50))),
+                const SizedBox(height: 20),
+                // Search Bar
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(color: Colors.grey[200]!),
+                  ),
+                  child: const TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Search destination...',
+                      border: InputBorder.none,
+                      icon: Icon(Icons.search, color: Colors.grey),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                // Tabs
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: _tabs.map((tab) {
+                      bool isSelected = _selectedTab == tab;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: ChoiceChip(
+                          label: Text(tab),
+                          selected: isSelected,
+                          onSelected: (val) => setState(() => _selectedTab = tab),
+                          selectedColor: const Color(0xFFF4A460),
+                          labelStyle: TextStyle(color: isSelected ? Colors.white : Colors.grey[600]),
+                          backgroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          // Content
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    height: 280,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _destinations.length,
+                      itemBuilder: (context, index) => _buildDestinationCard(_destinations[index]),
+                    ),
+                  ),
+                  const SizedBox(height: 25),
+                  const Text('Categories', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 15),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: _categories.map((c) => _buildCategoryItem(c)).toList(),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
-      templePaint,
     );
-
-    // Temple roof
-    final roofPath = Path()
-      ..moveTo(size.width * 0.2, size.height * 0.4)
-      ..lineTo(size.width * 0.5, size.height * 0.2)
-      ..lineTo(size.width * 0.8, size.height * 0.4)
-      ..close();
-
-    canvas.drawPath(roofPath, templePaint);
-
-    // Decorative elements
-    final decorPaint = Paint()
-      ..color = Colors.white.withOpacity(0.3)
-      ..style = PaintingStyle.fill;
-
-    for (int i = 0; i < 3; i++) {
-      canvas.drawCircle(
-        Offset(
-          size.width * (0.35 + i * 0.15),
-          size.height * 0.55,
-        ),
-        8,
-        decorPaint,
-      );
-    }
   }
 
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  Widget _buildDestinationCard(Map<String, dynamic> dest) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PlaceDetailsScreen(
+              placeId: dest['id'],
+              placeName: dest['name'],
+              imageUrl: dest['image'], // Pass image URL
+            ),
+          ),
+        );
+      },
+      child: Container(
+        width: 200,
+        margin: const EdgeInsets.only(right: 15, bottom: 10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 5))],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: Stack(
+            children: [
+              // Background Image
+              Positioned.fill(
+                child: CachedNetworkImage(
+                  imageUrl: dest['image'],
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Container(color: Colors.grey[300]),
+                  errorWidget: (context, url, error) => const Icon(Icons.error),
+                ),
+              ),
+              // Gradient Overlay
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Colors.transparent, Colors.black.withOpacity(0.8)],
+                      stops: const [0.6, 1.0],
+                    ),
+                  ),
+                ),
+              ),
+              // Text Content
+              Positioned(
+                bottom: 15,
+                left: 15,
+                right: 15,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(dest['name'], maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                    Row(
+                      children: [
+                        const Icon(Icons.location_on, color: Color(0xFFF4A460), size: 14),
+                        const SizedBox(width: 4),
+                        Expanded(child: Text(dest['location'], style: const TextStyle(color: Colors.white70, fontSize: 12))),
+                        const Icon(Icons.star, color: Colors.yellow, size: 14),
+                        Text(dest['rating'].toString(), style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryItem(Map<String, dynamic> category) {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(15),
+          decoration: BoxDecoration(
+            color: category['color'].withOpacity(0.2),
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: Icon(category['icon'], color: category['color'], size: 30),
+        ),
+        const SizedBox(height: 8),
+        Text(category['name'], style: const TextStyle(fontWeight: FontWeight.w500)),
+      ],
+    );
+  }
 }
